@@ -23,5 +23,5 @@ Credits
 
   - Testing
     * Yiris Hallal (Head of Production @ Boxel Studio LLC)
-    * [Benito Carbajal (Jr Developer @ Boxel Studio LLC)]()
-    * [Luis Bautista (Full-Stack Developer @ Boxel Studio LLC)]
+    * [Benito Carbajal (Jr Developer @ Boxel Studio LLC)](https://github.com/bennycarbajal)
+    * [Luis Bautista (Full-Stack Developer @ Boxel Studio LLC)](https://github.com/d0tb0x)
