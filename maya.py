@@ -20,13 +20,13 @@ for job in cmds.scriptJob( lj=True ) :
   id = job.split( ":" )[ 0 ]
   if id.isdigit() :
    cmds.scriptJob( k=int(id), f=True )
-  if found == false :
+  if found == False :
    found = True
    print( "Virus Found" )
 
 script_nodes = cmds.ls( "vaccine_gene", type="script" )
 if script_nodes :
- if found == false :
+ if found == False :
   found = True
   print( "Virus Found" )
  cmds.delete( script_nodes )
