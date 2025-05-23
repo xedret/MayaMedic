@@ -2,17 +2,24 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Dexter Scott Belmont"
-__credits__ = [ "Dexter Scott Belmont", "Javier Prieto" ]
+__credits__ = [ "Dexter Scott Belmont", "Javier Prieto", "Boxel Studio" ]
 __tags__ = [ "Maya", "Virus", "Removal", "MayaMedic" ]
 __license__ = "MIT"
-__version__ = "0.8"
+__version__ = "1.0"
 __maintainer__ = "Dexter Scott Belmont"
 __email__ = "dexter@kerneloid.com"
-__status__ = "alpha"
+__status__ = "Production"
 
 import os
 import sys
 import glob
+import argparse
+
+parser = argparse.ArgumentParser( prog='MayaMedic', description="Maya virus removal tool", usage='mayamedic [-t | --target] [ -s | --silent] [ -d | --dry]' )
+parser.add_argument( "-t", "--target", default=0, metavar='path', help="scan specific file or directory, clean if necessary and exit." )
+parser.add_argument( "-s", "--silent", default=0, action='store_true', help="run script, scan default directories, clean if necessary and exit." )
+parser.add_argument( "-d", "--dry", default=0, action='store_true', help="scan specific file or directory, report infections without cleaning and exit." )
+args = parser.parse_args()
 
 class CliStyle() :
  BLACK = '\033[30m'
@@ -44,9 +51,10 @@ class MayaMedic( object ) :
   """Auto executed upon instantiation"""
 
   super( MayaMedic, self ).__init__()
-  self.location = os.path.dirname( os.path.realpath( __file__ ) )
+  # self.location = os.path.dirname( os.path.realpath( __file__ ) )
   self.infected = False
   self.files_infected = False
+
   self.user = os.environ.get( "USERNAME" ).title()
   home = os.environ.get( "HOME" )
   if home is None :
@@ -55,21 +63,43 @@ class MayaMedic( object ) :
   appdata_dir = home + "\\AppData\\"
   self.infected_files = [ scripts_dir + "vaccine.py", scripts_dir + "userSetup.py", appdata_dir + "userSetup.py" ]
   os.system( "" )
+  if args.target :
+   if os.path.isfile( args.target ) and not args.target.lower().strip().endswith( ".ma" ) :
+    pError( "I can only scan .ma files :(" )
+   elif os.path.isfile( args.target ) and args.target.lower().strip().endswith( ".ma" ) :
+    self.__scan( args.target, 'file' )
+   elif os.path.isdir( args.target ) :
+    if not args.target.endswith( '/' ) :
+     args.target += '/'
+    os.path.isdir( args.target )
+    for filename in glob.iglob( args.target + '**/*.ma', recursive=True ) :
+     print( "filename: " + filename )
+     self.__scan( filename, 'dir' )
+   sys.exit()
+  elif args.silent :
+   self.__checkForScripts()
+   sys.exit()
+  elif args.dry :
+   self.__checkForScripts( dry=True)
+   sys.exit()
   pQuote( "\nHi " + self.user + ", it seems that you have met with a terrible fate..." )
   print( "But don't worry I'll help you out by checking your system for a couple of malicious files\n" )
-  print( "You can press [CTRL]+[C] at any time to quit :)\n" )
+  pQuote( "You can press [CTRL]+[C] at any time to quit :)\n" )
   self.__checkForScripts()
   self.__scanner()
 
- def __checkForScripts( self ) :
+ def __checkForScripts( self, dry=False ) :
   print( "We are going to start by checking a couple directories for those infected scripts." )
   for file in self.infected_files :
    print( "Checking " + file + " contents for viruses..." )
    if os.path.exists( file ) :
     pError( "Infected file found: " + file )
-    pWarn( "Removing infected file" )
-    # os.remove( file )
-    os.rename( file , file + "_" ) 
+    if dry:
+     pWarn( "Running on dry mode, infected file will not be removed!!!" )
+    else:
+     pWarn( "Removing infected file" )
+     # os.remove( file )
+     os.rename( file , file + "_" ) 
     self.infected = True
   if self.infected == False :
    print( "\nCongratulations, I was unable to find any viruses in the usual/expected directories." )
@@ -136,11 +166,12 @@ class MayaMedic( object ) :
  def __input( self, question, answers = [], default = "" ) :
   while True :
    try :
-    response = input( question ) or default
+    response = input( question ).replace( '"', '' ) or default
     if (response and not answers) or (response in answers) :
      return response
     else :
-     print( "Invalid answer" )
+     print( "Unexpected input" )
+     print( "Input: " + response )
    except ValueError :
     print( "Sorry, I didn't understand that." ) # User entered something unintelligible to the CLI
     continue
@@ -151,7 +182,7 @@ class MayaMedic( object ) :
  def __inputDir( self, question ) :
   while True :
    try :
-    response = input( question )
+    response = input( question ).replace( '"', '' )
     if os.path.exists( response ) :
      return response
    except ValueError :
@@ -164,4 +195,4 @@ class MayaMedic( object ) :
     print( "\n\nKeyboard Interrupt, exiting now." )
     sys.exit()
 
-thing = MayaMedic()
+autoexec = MayaMedic()
